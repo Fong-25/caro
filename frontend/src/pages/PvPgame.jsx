@@ -15,6 +15,15 @@ function PvPgame() {
     const [isGameActive, setIsGameActive] = useState(false);
 
     useEffect(() => {
+        socket.off('playerSymbol');
+        socket.off('playerCount');
+        socket.off('gameState');
+        socket.off('currentTurn');
+        socket.off('moveMade');
+        socket.off('gameWinner');
+        socket.off('gameReset');
+        socket.off('roomError');
+        socket.off('playerDisconnected');
         // Join the room on mount
         socket.emit('joinRoom', roomId);
 
@@ -30,7 +39,7 @@ function PvPgame() {
                 setIsGameActive(false);
             } else {
                 toast.dismiss('waitingToast');
-                toast.success('Game started!');
+                toast.success('Game started!', { id: 'gameStartToast' });
                 setIsGameActive(true);
             }
         });
@@ -118,17 +127,19 @@ function PvPgame() {
         socket.emit('playerLeft', roomId);
         console.log('Player left room');
         // toast.error('Other player disconnected');
+        toast.dismiss('gameStartToast');
+        toast.dismiss('waitingToast');
     };
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-600 via-emerald-500 to-teal-500 p-6 flex flex-col items-center">
-            <h2 className="text-3xl font-bold text-white mb-4">
+            <h2 className="text-lg sm:text-sm font-semibold text-white mb-4 break-words">
                 Room: {roomId} | You are: {symbol || 'Waiting...'} | Players: {playerCount}/2
             </h2>
 
             {winner && (
                 <div className="mb-4 p-4 bg-white/20 backdrop-blur-lg rounded-xl shadow-xl border border-white/20">
-                    <h3 className="text-2xl text-white text-center">
+                    <h3 className="text-sm text-white text-center">
                         {winner === symbol ? 'You won! 🎉' : 'You lost! 😢'}
                         ({winner} wins)
                     </h3>
@@ -141,20 +152,34 @@ function PvPgame() {
                 </h3>
             )}
 
-            <div className="grid grid-cols-15 gap-1 bg-white p-2 rounded-lg shadow-xl">
-                {board.map((row, x) => (
-                    row.map((cell, y) => (
-                        <div
-                            key={`${x}-${y}`}
-                            onClick={() => handleMove(x, y)}
-                            className={`w-8 h-8 flex items-center justify-center border border-gray-300 
-                                ${!cell && isGameActive && symbol === turn ? 'hover:bg-gray-200 cursor-pointer' : ''} 
-                                ${cell === 'X' ? 'text-red-500 font-bold' : cell === 'O' ? 'text-blue-500 font-bold' : ''}`}
-                        >
-                            {cell}
-                        </div>
-                    ))
-                ))}
+            <div className="w-full max-w-[calc(15*3rem)] mx-auto px-2">
+                <div className="grid grid-cols-15 gap-0.5 bg-white/30 backdrop-blur-sm p-1 rounded-lg shadow-xl border border-white/20">
+                    {board.map((row, x) => (
+                        row.map((cell, y) => (
+                            <div
+                                key={`${x}-${y}`}
+                                onClick={() => handleMove(x, y)}
+                                className={`
+                        aspect-square w-full flex items-center justify-center 
+                        border border-white/30 
+                        bg-white/20 backdrop-blur-sm
+                        text-xl font-bold transition-all duration-200
+                        ${!cell && isGameActive && symbol === turn
+                                        ? 'hover:bg-white/40 cursor-pointer'
+                                        : ''} 
+                        ${cell === 'X'
+                                        ? 'text-red-600 bg-red-100/30'
+                                        : cell === 'O'
+                                            ? 'text-blue-600 bg-blue-100/30'
+                                            : ''
+                                    }
+                    `}
+                            >
+                                {cell}
+                            </div>
+                        ))
+                    ))}
+                </div>
             </div>
 
             {playerCount < 2 && (
@@ -179,7 +204,10 @@ function PvPgame() {
                     Return to Lobby
                 </button>
             </div>
-            <Toaster />
+            <Toaster
+                position="top-right"
+                reverseOrder={false}
+            />
         </div>
     );
 }

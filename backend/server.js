@@ -6,6 +6,7 @@ const cors = require("cors");
 const path = require("path");
 const session = require('express-session');
 const authRoutes = require("./routes/auth");
+const leaderboardRoutes = require("./routes/leaderboard");
 const http = require("http");
 const socketIo = require("socket.io");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
@@ -24,7 +25,10 @@ app.use(session({
     resave: false,
     saveUninitialized: false
 }));
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"]
+}));
 
 mongoose
     .connect(process.env.MONGO_URI)
@@ -34,6 +38,7 @@ mongoose
 
 // API Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/leaderboard", leaderboardRoutes)
 // Serve frontend (for production)
 app.use(express.static(path.join(path.resolve(), "/frontend/dist")));
 
@@ -77,11 +82,6 @@ io.on('connection', (socket) => {
             const updatedSize = updatedRoom ? updatedRoom.size : 0;
             io.to(prevRoom).emit('playerCount', updatedSize);
         }
-        playerRooms.clear();
-        socket.on('playerLeft', () => {
-            io.to(roomId).emit('playerDisconnected');
-        });
-
         playerRooms.clear();
 
         // Join the new room
@@ -139,6 +139,11 @@ io.on('connection', (socket) => {
 
         // Notify room of player count
         io.to(roomId).emit('playerCount', players.length);
+    });
+
+
+    socket.on('playerLeft', (roomId) => {
+        io.to(roomId).emit('playerDisconnected');
     });
 
     socket.on('makeMove', ({ roomId, x, y, symbol }) => {

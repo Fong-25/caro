@@ -8,6 +8,10 @@ function JoinPvP() {
     const [roomId, setRoomId] = useState("");
 
     useEffect(() => {
+        // Remove existing listeners first
+        socket.off('playerSymbol');
+        socket.off('roomError');
+
         socket.on('playerSymbol', (symbol) => {
             if (roomId) {
                 toast.success(`Room joined successfully! You are ${symbol}`);

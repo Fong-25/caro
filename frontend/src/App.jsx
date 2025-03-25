@@ -4,6 +4,7 @@ import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import Lobby from "./pages/Lobby";
 import PvPgame from "./pages/PvPgame"
+import Leaderboard from "./pages/Leaderboard";
 
 function App() {
 
@@ -15,6 +16,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<Login />} />
         <Route path='/play/:roomId' element={<PvPgame />} />
+        <Route path='leaderboard' element={<Leaderboard />} />
       </Routes>
     </Router>
   )
