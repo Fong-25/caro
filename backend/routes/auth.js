@@ -59,7 +59,10 @@ router.post("/login", async (req, res) => {
         }
         // Optionally, set a session or token (simple session for now)
         req.session.userId = user._id; // Store user ID in session
-        res.status(200).json({ message: "Login successfully!" });
+        res.status(200).json({
+            message: "Login successfully!",
+            userId: user._id,
+        });
     } catch (error) {
         res.status(500).json({ error: "Server error: " + error.message });
     }
@@ -67,7 +70,7 @@ router.post("/login", async (req, res) => {
 
 router.get("/user", isAuth, async (req, res) => {
     try {
-        const user = await User.find({ userId: req.session.userId }).sort({
+        const user = await User.findById({ userId: req.session.userId }).sort({
             createdAt: -1,
         });
         if (user) {

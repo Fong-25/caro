@@ -9,6 +9,7 @@ const authRoutes = require("./routes/auth");
 const leaderboardRoutes = require("./routes/leaderboard");
 const http = require("http");
 const socketIo = require("socket.io");
+const User = require('./models/user')
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 const app = express();

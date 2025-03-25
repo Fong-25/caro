@@ -31,6 +31,7 @@ function Login() {
 
             if (response.ok) {
                 toast.success(data.message || "Login successfully!");
+                localStorage.setItem("userId", data.userId); // Store user ID in localStorage
                 setFormData({ username: "", password: "" }); // Clear form
                 navigate("/lobby"); // Redirect to dashboard
             } else {
